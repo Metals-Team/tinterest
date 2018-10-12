@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetTagsFunction", "GetTagsFunction\GetTagsFunction.csproj", "{694D4C9E-DE1F-4044-BB5D-C2E7022F8430}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{694D4C9E-DE1F-4044-BB5D-C2E7022F8430}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{694D4C9E-DE1F-4044-BB5D-C2E7022F8430}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{694D4C9E-DE1F-4044-BB5D-C2E7022F8430}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{694D4C9E-DE1F-4044-BB5D-C2E7022F8430}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BAFF3A17-0DB9-4D49-8BCC-02A8DB925356}
+	EndGlobalSection
+EndGlobal
