@@ -1,21 +1,49 @@
 import React from 'react';
 import {
 	Image,
+	Button,
 	Platform,
 	ScrollView,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
 	View,
+	Alert
 } from 'react-native';
 import { WebBrowser } from 'expo';
+import { createStackNavigator } from 'react-navigation';
+import SettingsScreen from './SettingsScreen';
 
 import { MonoText } from '../components/StyledText';
+import { PrincipalService } from '../services/principal.service';
+
+const SettingsStack = createStackNavigator({
+	Settings: SettingsScreen,
+});
+
+SettingsStack.navigationOptions = {
+	tabBarLabel: 'Settings',
+	tabBarIcon: ({ focused }) => (
+		<TabBarIcon
+			focused={focused}
+			name={Platform.OS === 'ios' ? `ios-options${focused ? '' : '-outline'}` : 'md-options'}
+		/>
+	),
+};
 
 export default class HomeScreen extends React.Component {
+	principalService = new PrincipalService();
 	static navigationOptions = {
 		header: null,
 	};
+
+	async componentDidMount() {
+		console.log('mounting home component');
+		if(!(await this.principalService.isLoggedIn())){
+			console.log('unauthorized!')
+			this.props.navigation.navigate('Login');
+		}
+    }
 
 	render() {
 		return (
@@ -31,24 +59,14 @@ export default class HomeScreen extends React.Component {
 							style={styles.welcomeImage}
 						/>
 					</View>
-
+					<Button onPress={() => this.logIn()} title="Kiss me!" />
 					<View style={styles.getStartedContainer}>
 						{this._maybeRenderDevelopmentModeWarning()}
-
-						<Text style={styles.getStartedText}>Get started by opening</Text>
-
-						<View style={[styles.codeHighlightContainer, styles.homeScreenFilename]}>
-							<MonoText style={styles.codeHighlightText}>screens/HomeScreen.js</MonoText>
-						</View>
-
-						<Text style={styles.getStartedText}>
-							Change this text and your app will automatically reload.
-            </Text>
 					</View>
 
 					<View style={styles.helpContainer}>
 						<TouchableOpacity onPress={this._handleHelpPress} style={styles.helpLink}>
-							<Text style={styles.helpLinkText}>Help, it didn’t automatically reload!</Text>
+							<Text style={styles.helpLinkText}>Help, it ! didn’t automatically reload!</Text>
 						</TouchableOpacity>
 					</View>
 				</ScrollView>
