@@ -11,6 +11,7 @@ namespace MetalsTeam.Tinterest.UserFunctions.Services
 	{
 		public override async Task<IActionResult> Run()
 		{
+			//TODO: Use CurrentUser.FacebookId to check if action is allowed
 			if (this.request.Method == HttpMethods.Get && int.TryParse(this.request.Query["userId"], out int id))
 			{
 				return new OkObjectResult(await this.repository.GetAsync(id));
