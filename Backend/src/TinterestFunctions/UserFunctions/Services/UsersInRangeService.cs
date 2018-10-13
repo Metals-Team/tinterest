@@ -1,24 +1,18 @@
-﻿using DataAccess.Repositories;
+﻿using System.Threading.Tasks;
 using MetalsTeam.Tinterest.Models;
 using MetalsTeam.Tinterest.Models.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace MetalsTeam.Tinterest.UserFunctions.Services
 {
-	public class UsersInRangeService : ServiceBase
+	public class UsersInRangeService : ServiceBase<UserConfiguration>
 	{
 		public override async Task<IActionResult> Run()
 		{
-			var repository = new Repository<UserConfiguration>(this.configuration.GetConnectionString("sqlDbConnectionString"));
-
-			if (this.request.Method == HttpMethods.Get)
+			if (this.request.Method == HttpMethods.Post)
 			{
-				return new OkObjectResult(await repository.GetFilteredAsync(GetFilters(), "InRange"));
+				return new OkObjectResult(await this.repository.GetFilteredAsync(GetFilters(), "InRange"));
 			}
 			else
 			{
@@ -26,14 +20,11 @@ namespace MetalsTeam.Tinterest.UserFunctions.Services
 			}
 		}
 
-		private async Task<RangeFilter> GetFilters()
+		private async Task<RadiusRangeFilter> GetFilters()
 		{
-			using (var reader = new StreamReader(this.request.Body))
-			{
-				var filter =  JsonConvert.DeserializeObject<RadiusRangeFilter>(await reader.ReadToEndAsync());
-				filter.CalculateRange();
-				return filter;
-			}
+			var filter = await GetRequestBodyAsync<RadiusRangeFilter>();
+			filter.CalculateRange();
+			return filter;
 		}
 	}
 }

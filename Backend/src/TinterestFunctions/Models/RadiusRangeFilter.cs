@@ -2,8 +2,12 @@
 
 namespace MetalsTeam.Tinterest.Models
 {
-	public class RadiusRangeFilter : RangeFilter
+	public class RadiusRangeFilter
 	{
+		public float Latitude { get; set; }
+		public float Longitude { get; set; }
+		public int Radius { get; set; }
+		public int InterestId { get; set; }
 		public double MinLatitude { get; set; }
 		public double MinLongitude { get; set; }
 		public double MaxLatitude { get; set; }

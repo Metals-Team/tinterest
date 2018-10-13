@@ -1,3 +1,3 @@
 ﻿SELECT *
 FROM dbo.UserConfiguration
-WHERE @Id = Id
+WHERE @Id = FacebookId

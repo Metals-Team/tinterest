@@ -1,45 +1,31 @@
-﻿using DataAccess.Repositories;
+﻿using System;
+using System.Threading.Tasks;
 using MetalsTeam.Tinterest.Models;
 using MetalsTeam.Tinterest.Models.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace MetalsTeam.Tinterest.UserFunctions.Services
 {
-	public class UserConfigurationService : ServiceBase
+	public class UserConfigurationService : ServiceBase<UserConfiguration>
 	{
 		public override async Task<IActionResult> Run()
 		{
-			var repository = new Repository<UserConfiguration>(this.configuration.GetConnectionString("sqlDbConnectionString"));
-
 			if (this.request.Method == HttpMethods.Get && int.TryParse(this.request.Query["userId"], out int id))
 			{
-				return new OkObjectResult(await repository.GetAsync(id));
+				return new OkObjectResult(await this.repository.GetAsync(id));
 			}
 			else if (this.request.Method == HttpMethods.Post)
 			{
-				var userConfiguration = await GetUserConfigurationAsync();
-				await repository.AddAsync(userConfiguration.Id, userConfiguration);
-
-				return new OkResult();
+				return await ModifyUser(async userConfiguration => await this.repository.AddAsync(userConfiguration.Id, userConfiguration));
 			}
 			else if (this.request.Method == HttpMethods.Put)
 			{
-				var userConfiguration = await GetUserConfigurationAsync();
-				await repository.UpdateAsync(userConfiguration.Id, userConfiguration);
-
-				return new OkResult();
+				return await ModifyUser(async userConfiguration => await this.repository.UpdateAsync(userConfiguration.Id, userConfiguration));
 			}
 			else if (this.request.Method == HttpMethods.Delete)
 			{
-				var userConfiguration = await GetUserConfigurationAsync();
-				await repository.DeleteAsync(userConfiguration.Id);
-
-				return new OkResult();
+				return await ModifyUser(async userConfiguration => await this.repository.DeleteAsync(userConfiguration.Id));
 			}
 			else
 			{
@@ -47,12 +33,11 @@ namespace MetalsTeam.Tinterest.UserFunctions.Services
 			}
 		}
 
-		private async Task<UserConfiguration> GetUserConfigurationAsync()
+		private async Task<IActionResult> ModifyUser(Func<UserConfiguration, Task> action)
 		{
-			using (var reader = new StreamReader(this.request.Body))
-			{
-				return JsonConvert.DeserializeObject<UserConfiguration>(await reader.ReadToEndAsync());
-			}
+			await action(await GetRequestBodyAsync<UserConfiguration>());
+
+			return new OkResult();
 		}
 	}
 }
