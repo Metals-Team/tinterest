@@ -20,7 +20,7 @@ namespace MetalsTeam.Tinterest.TagsFunction
 				.WithExecutionContext(context)
 				.WithLogger(log)
 				.WithDataAccessFacade(config => new SqlDataAccessFacade(config.GetConnectionString("sqlDbConnectionString")))
-				.Run();
+				.TryRun();
 		}
 	}
 }

@@ -1,9 +1,11 @@
 using System.Threading.Tasks;
+using MetalsTeam.Tinterest.DataAccess;
 using MetalsTeam.Tinterest.UserFunctions.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace MetalsTeam.Tinterest.UserFunctions
@@ -17,7 +19,8 @@ namespace MetalsTeam.Tinterest.UserFunctions
 				.ForRequest(req)
 				.WithExecutionContext(context)
 				.WithLogger(log)
-				.Run();
+				.WithDataAccessFacade(config => new SqlDataAccessFacade(config.GetConnectionString("sqlDbConnectionString")))
+				.TryRun();
 		}
 	}
 }

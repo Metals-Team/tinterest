@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using MetalsTeam.Tinterest.DataAccess;
@@ -21,6 +22,8 @@ namespace MetalsTeam.Tinterest.Models.Services
 		protected DocumentClient dbClient;
 		protected Repository<TModel> repository;
 
+		private readonly List<Action<Exception>> exceptionHandlers = new List<Action<Exception>>();
+
 		public ServiceBase<TModel> WithExecutionContext(ExecutionContext context)
 		{
 			this.configuration = new ConfigurationBuilder()
@@ -35,6 +38,12 @@ namespace MetalsTeam.Tinterest.Models.Services
 		public ServiceBase<TModel> WithLogger(ILogger logger)
 		{
 			this.logger = logger;
+			return this;
+		}
+
+		public ServiceBase<TModel> OnException(Action<Exception> exceptionHandler)
+		{
+			this.exceptionHandlers.Add(exceptionHandler);
 			return this;
 		}
 
@@ -54,6 +63,24 @@ namespace MetalsTeam.Tinterest.Models.Services
 		{
 			this.repository = new Repository<TModel>(dataAccessFactory(this.configuration));
 			return this;
+		}
+
+		public virtual Task<IActionResult> TryRun()
+		{
+			try
+			{
+				return Run();
+			}
+			catch (Exception exception)
+			{
+				foreach (var handler in this.exceptionHandlers)
+				{
+					handler(exception);
+				}
+
+				this.logger.LogError(exception, "Function execution failed");
+				return Task.FromResult(default(IActionResult));
+			}
 		}
 
 		public abstract Task<IActionResult> Run();
