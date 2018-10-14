@@ -4,12 +4,12 @@ using System.IO;
 using System.Threading.Tasks;
 using MetalsTeam.Tinterest.DataAccess;
 using MetalsTeam.Tinterest.DataAccess.Repositories;
+using MetalsTeam.Tinterest.Infrastructure.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace MetalsTeam.Tinterest.Models.Services
@@ -24,13 +24,20 @@ namespace MetalsTeam.Tinterest.Models.Services
 
 		private readonly List<Action<Exception>> exceptionHandlers = new List<Action<Exception>>();
 
-		public ServiceBase<TModel> WithExecutionContext(ExecutionContext context)
+		public ServiceBase<TModel> WithExecutionContext(ExecutionContext context, params string[] jsonFiles)
 		{
-			this.configuration = new ConfigurationBuilder()
+			var configurationBuilder = new ConfigurationBuilder()
 				.SetBasePath(context.FunctionAppDirectory)
 				.AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
-				.AddEnvironmentVariables()
-				.Build();
+				.AddEnvironmentVariables();
+
+			foreach (var file in jsonFiles)
+			{
+				configurationBuilder
+					.AddJsonFile(file, optional: true, reloadOnChange: true);
+			}
+
+			this.configuration = configurationBuilder.Build();
 
 			return this;
 		}
@@ -65,11 +72,12 @@ namespace MetalsTeam.Tinterest.Models.Services
 			return this;
 		}
 
-		public virtual Task<IActionResult> TryRun()
+		public virtual async Task<IActionResult> TryRun()
 		{
 			try
 			{
-				return Run();
+				this.logger.Log("Starting service");
+				return await Run();
 			}
 			catch (Exception exception)
 			{
@@ -78,8 +86,12 @@ namespace MetalsTeam.Tinterest.Models.Services
 					handler(exception);
 				}
 
-				this.logger.LogError(exception, "Function execution failed");
-				return Task.FromResult(default(IActionResult));
+				this.logger.LogError(exception, "Service execution failed");
+				throw;
+			}
+			finally
+			{
+				this.logger.Log("Service execution complete");
 			}
 		}
 
